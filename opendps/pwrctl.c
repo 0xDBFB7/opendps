@@ -26,6 +26,7 @@
 #include "dps-model.h"
 #include <gpio.h>
 #include <dac.h>
+#include "calculate_pid.h"
 
 /** This module handles voltage and current calculations
   * Calculations based on measurements found at
@@ -50,15 +51,16 @@ void pwrctl_init(void)
 /**
   * @brief Set voltage output
   * @param value_mv voltage in milli volt
-  * @retval true requested voltage was within specs
   */
 bool pwrctl_set_vout(uint32_t value_mv)
 {
-    /** @todo Check with max Vout, currently filtered by ui.c */
-    v_out = value_mv;
+    uint16_t i_out_raw, v_in_raw, v_out_raw;
+    hw_get_adc_values(&i_out_raw, &v_in_raw, &v_out_raw);
+    (void) i_out_raw;
+    (void) v_in_raw;
+process_voltage_pid(v_out_raw, pwrctl_calc_vout(v_out_raw) / 100.0);
     if (v_out_enabled) {
-        /** Needed for the DPS5005 "communications version" (the one with BT/USB) */
-        DAC_DHR12R1 = pwrctl_calc_vout_dac(v_out);
+        DAC_DHR12R1 = pwrctl_calc_vout_dac(value_mv);
     }
     return true;
 }
@@ -70,8 +72,8 @@ bool pwrctl_set_vout(uint32_t value_mv)
   */
 bool pwrctl_set_iout(uint32_t value_ma)
 {
-    i_out = value_ma;
-    DAC_DHR12R2 = pwrctl_calc_iout_dac(value_ma);
+  uint32_t dac = 0.15 * 2.0 + A_DAC_C;
+  DAC_DHR12R1 = dac & 0xfff;
     return true;
 }
 
