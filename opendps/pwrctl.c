@@ -54,9 +54,10 @@ void pwrctl_init(void)
   */
 bool pwrctl_set_vout(uint32_t value_mv)
 {
-    if (v_out_enabled) {
+    dbg_printf("set function called: %u\r\n",value_mv);
+    if (value_mv) {
         /** Needed for the DPS5005 "communications version" (the one with BT/USB) */
-        DAC_DHR12R1 = pwrctl_calc_vout_dac(get_voltage_pid());
+        set_target_pid_voltage(value_mv);
     }
     return true;
 }

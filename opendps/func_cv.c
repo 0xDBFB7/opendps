@@ -31,7 +31,7 @@
 #include "cv.h"
 
 /*
- * This is the implementation of the CV screen. It has two editable values, 
+ * This is the implementation of the CV screen. It has two editable values,
  * constant voltage and current limit. When power is enabled it will continously
  * display the current output voltage and current draw. If the user edits one
  * of the values when power is eabled, the other will continue to be updated.
@@ -125,7 +125,7 @@ static void cv_enable(bool enabled)
         pwrctl_enable_vout(true);
     } else {
         pwrctl_enable_vout(false);
-        /** Make sure we're displaying the settings and not the current 
+        /** Make sure we're displaying the settings and not the current
           * measurements when the power output is switched off */
         cv_voltage.value = saved_u;
         cv_voltage.ui.draw(&cv_voltage.ui);
@@ -255,7 +255,7 @@ void func_cv_init(uui_t *ui)
     (void) v_out_raw;
     cv_voltage.max = pwrctl_calc_vin(v_in_raw) / 10; /** @todo: subtract for LDO */
     number_init(&cv_voltage); /** @todo: add guards for missing init calls */
-    /** Start at the second most significant digit preventing the user from 
+    /** Start at the second most significant digit preventing the user from
         accidentally cranking up the setting 10V or more */
     cv_voltage.cur_digit = 2;
     number_init(&cv_current);

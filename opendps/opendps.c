@@ -507,7 +507,8 @@ static void event_handler(void)
     while(1) {
         pid_update_voltages();
         process_voltage_pid();
-
+        pid_update_dac_value();
+        
         event_t event;
         uint8_t data = 0;
         if (!event_get(&event, &data)) {
