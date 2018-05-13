@@ -1,3 +1,3 @@
 #!/bin/bash
 cd scripts
-openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg
+openocd -f interface/cmsis-dap.cfg -f target/stm32f1x.cfg

@@ -505,6 +505,9 @@ static void check_master_reset(void)
 static void event_handler(void)
 {
     while(1) {
+        pid_update_voltages();
+        process_voltage_pid();
+
         event_t event;
         uint8_t data = 0;
         if (!event_get(&event, &data)) {
