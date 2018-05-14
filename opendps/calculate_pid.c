@@ -25,6 +25,10 @@ uint16_t required_DAC_value = 0;
 
 uint64_t previous_ticks = 0;
 
+void dummy_debug(const char *fmt, ...);
+
+#define pid_debug dbg_printf
+
 //this should all be moved to the global config file
 #define V_OFFSET_CONST_DEFAULT 0.95 // this offsets the whole pid on startup
                                     // to get closer to the desired point
@@ -34,9 +38,9 @@ uint64_t previous_ticks = 0;
                                     // killing themselves laughing at how stupid this is.
                                     // But it seems to work okay.
                                     // burma shave
-#define V_P_CONST_DEFAULT 0.3
-#define V_I_CONST_DEFAULT 1
-#define V_D_CONST_DEFAULT 0.1//0.2
+#define V_P_CONST_DEFAULT 0.2
+#define V_I_CONST_DEFAULT 0.4
+#define V_D_CONST_DEFAULT 0.05//0.2
 
 #define C_P_CONST_DEFAULT 0.3
 #define C_I_CONST_DEFAULT 1
@@ -59,9 +63,11 @@ uint16_t WINDUP_CONSTRAINTS = WINDUP_CONSTRAINTS_DEFAULT;
 uint16_t ALLOWABLE_OVERSHOOT = ALLOWABLE_OVERSHOOT_DEFAULT;
 
 
-// void update_pid_tuning(uint16_t new_V_OFFSET_CONST,uint16_t new_,uint16_t new_,uint16_t new_,uint16_t new_,uint16_t new_){
-//
-// }
+void update_pid_tuning(uint16_t new_V_P_CONST,uint16_t new_V_I_CONST,uint16_t new_V_D_CONST){
+  V_P_CONST = new_V_P_CONST/100.0;
+  V_I_CONST = new_V_I_CONST/100.0;
+  V_D_CONST = new_V_D_CONST/100.0;
+}
 
 void pid_update_voltages(){
   uint16_t i_out_raw, v_in_raw, v_out_raw;
@@ -71,16 +77,22 @@ void pid_update_voltages(){
   current_voltage = pwrctl_calc_vout(v_out_raw);
 }
 
+void reset_pid(){
+  voltage_integral = 0;
+  current_integral = 0;
+}
+
 void set_target_pid_voltage(int new_target_voltage){
-  dbg_printf("voltage set to: %u\r\n",new_target_voltage);
+  pid_debug("voltage set to: %u\r\n",new_target_voltage);
   if(new_target_voltage != target_voltage){
     voltage_integral = 0;
     target_voltage = new_target_voltage;
   }
 }
 
+
 void set_target_pid_current(int new_target_current){
-  dbg_printf("target_current: %u\r\n",new_target_current);
+  pid_debug("target_current: %u\r\n",new_target_current);
   if(new_target_current != target_current){
     voltage_integral = 0;
     target_current = new_target_current;
@@ -123,17 +135,18 @@ int process_pid_algorithms(){ //units: millivolts.
   // }
 
   voltage_integral = constrain(voltage_integral,-WINDUP_CONSTRAINTS,WINDUP_CONSTRAINTS);
-  required_DAC_value = constrain(required_DAC_value,0,30000);
+  required_DAC_value = constrain(required_DAC_value,0,65000);
 
-  dbg_printf("timestep: %u\r\n",(uint16_t)timestep*100.0);
-  dbg_printf("error: %u\r\n",abs(voltage_error));
-  dbg_printf("voltage_integral: %u\r\n",abs(voltage_integral));
+  pid_debug("timestep: %u\r\n",(uint16_t)timestep*100.0);
+  pid_debug("error: %u\r\n",abs(voltage_error));
+  pid_debug("voltage_integral: %u\r\n",abs(voltage_integral));
 
-  dbg_printf("current_voltage: %u\r\n",current_voltage);
-  dbg_printf("target_current: %u\r\n",target_current);
-  dbg_printf("target_voltage: %u\r\n",target_voltage);
-  dbg_printf("required_DAC_value: %u\r\n",required_DAC_value);
-  dbg_printf("current_mode: %u\r\n",current_mode);
+  pid_debug("current_voltage: %u\r\n",current_voltage);
+  pid_debug("target_current: %u\r\n",target_current);
+  pid_debug("target_voltage: %u\r\n",target_voltage);
+  pid_debug("required_DAC_value: %u\r\n",required_DAC_value);
+  pid_debug("current_mode: %u\r\n",current_mode);
+  pid_debug("PID: %u, %u, %u", (int)(V_P_CONST*100),(int)(V_I_CONST*100),(int)(V_D_CONST*100));
 
   return required_DAC_value;
 }

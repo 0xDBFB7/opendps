@@ -520,7 +520,11 @@ static void event_handler(void)
                     dbg_printf("Weird, should not receive 'none events'\n");
                     break;
                 case event_uart_rx:
-                    serial_handle_rx_char(data);
+                    #ifdef CONFIG_COMMANDLINE
+                      cmdline_handle_rx_char(data);
+                    #else
+                      serial_handle_rx_char(data);
+                    #endif
                     break;
                 case event_ocp:
                     break;

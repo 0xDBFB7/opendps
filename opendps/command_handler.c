@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include "dbg_printf.h"
 #include "cli.h"
-#include "ui.h"
+#include "uui.h"
 #include "hw.h"
 #include "pwrctl.h"
 #include "serialhandler.h"
@@ -74,14 +74,14 @@ static const cli_command_t commands[] = {
     {
         .cmd = "tune",
         .handler = &pid_tune_cmd,
-        .min_arg = 6, .max_arg = 6,
+        .min_arg = 3, .max_arg = 3,
         .help = "Set PID tuning parameters.",
         .usage = "",
     },
   };
 
 
-void serial_handle_rx_char(char c)
+void cmdline_handle_rx_char(char c)
 {
     static char buffer[80];
     static uint32_t i = 0;
@@ -152,7 +152,6 @@ static void v_cmd(uint32_t argc, char *argv[])
     pwrctl_set_vout(v_out);
 }
 
-static void pid_tune_cmd(uint32_t argc, char *argv[])
-{
-
+static void pid_tune_cmd(uint32_t argc, char *argv[]){
+    update_pid_tuning(atoi(argv[1]),atoi(argv[2]),atoi(argv[3]));
 }

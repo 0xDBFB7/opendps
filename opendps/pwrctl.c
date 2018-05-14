@@ -54,7 +54,7 @@ void pwrctl_init(void)
   */
 bool pwrctl_set_vout(uint32_t value_mv)
 {
-    dbg_printf("set function called: %u\r\n",value_mv);
+    reset_pid();
     if (value_mv) {
         /** Needed for the DPS5005 "communications version" (the one with BT/USB) */
         set_target_pid_voltage(value_mv);
