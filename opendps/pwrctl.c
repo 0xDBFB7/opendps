@@ -123,6 +123,7 @@ uint32_t pwrctl_get_ilimit(void)
 void pwrctl_enable_vout(bool enable)
 {
     v_out_enabled = enable;
+    reset_pid();
     if (v_out_enabled) {
       (void) pwrctl_set_vout(v_out);
 #ifdef DPS5015

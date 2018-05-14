@@ -38,8 +38,8 @@ void dummy_debug(const char *fmt, ...);
                                     // killing themselves laughing at how stupid this is.
                                     // But it seems to work okay.
                                     // burma shave
-#define V_P_CONST_DEFAULT 0.2
-#define V_I_CONST_DEFAULT 0.4
+#define V_P_CONST_DEFAULT 1
+#define V_I_CONST_DEFAULT 0.3
 #define V_D_CONST_DEFAULT 0.05//0.2
 
 #define C_P_CONST_DEFAULT 0.3
@@ -80,6 +80,7 @@ void pid_update_voltages(){
 void reset_pid(){
   voltage_integral = 0;
   current_integral = 0;
+  previous_ticks = get_ticks();
 }
 
 void set_target_pid_voltage(int new_target_voltage){
