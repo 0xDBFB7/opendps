@@ -38,7 +38,7 @@ void dummy_debug(const char *fmt, ...);
                                     // killing themselves laughing at how stupid this is.
                                     // But it seems to work okay.
                                     // burma shave
-#define V_P_CONST_DEFAULT 1
+#define V_P_CONST_DEFAULT 0.6
 #define V_I_CONST_DEFAULT 0.3
 #define V_D_CONST_DEFAULT 0.05//0.2
 
@@ -121,6 +121,12 @@ int process_pid_algorithms(){ //units: millivolts.
     current_mode = 0;
   }
   ///////////////
+  if(current_voltage > target_voltage+ALLOWABLE_OVERSHOOT && voltage_integral > 100){ //we really, really don't want the voltage to go
+                                                            //much above the target. Proper PID tuning should mostly deal with that
+                                                            //but just in case...
+    voltage_integral -= 50;
+  }
+
   if(current_mode){
     required_DAC_value = V_OFFSET_CONST*target_voltage + V_P_CONST*current_error + V_I_CONST*current_integral + V_D_CONST*current_derivative;
   }
@@ -129,11 +135,6 @@ int process_pid_algorithms(){ //units: millivolts.
   }
   previous_voltage_error = voltage_error;
 
-  // if(current_voltage > target_voltage+ALLOWABLE_OVERSHOOT){ //we really, really don't want the voltage to go
-  //                                                           //much above the target. Proper PID tuning should mostly deal with that
-  //                                                           //but just in case...
-  //   voltage_integral = 0;
-  // }
 
   voltage_integral = constrain(voltage_integral,-WINDUP_CONSTRAINTS,WINDUP_CONSTRAINTS);
   required_DAC_value = constrain(required_DAC_value,0,65000);

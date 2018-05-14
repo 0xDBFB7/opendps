@@ -69,6 +69,7 @@ bool pwrctl_set_vout(uint32_t value_mv)
   */
 bool pwrctl_set_iout(uint32_t value_ma)
 {
+    reset_pid();
     i_out = value_ma;
     DAC_DHR12R2 = pwrctl_calc_iout_dac(value_ma);
     return true;
@@ -99,6 +100,7 @@ uint32_t pwrctl_get_vout(void)
   */
 bool pwrctl_set_ilimit(uint32_t value_ma)
 {
+    reset_pid();
     /** @todo Check with I_limit, currently filtered by ui.c */
     i_limit = value_ma;
     set_target_pid_current(value_ma);
