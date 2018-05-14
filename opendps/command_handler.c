@@ -74,7 +74,7 @@ static const cli_command_t commands[] = {
     {
         .cmd = "tune",
         .handler = &pid_tune_cmd,
-        .min_arg = 1, .max_arg = 4,
+        .min_arg = 6, .max_arg = 6,
         .help = "Set PID tuning parameters.",
         .usage = "",
     },
@@ -154,11 +154,5 @@ static void v_cmd(uint32_t argc, char *argv[])
 
 static void pid_tune_cmd(uint32_t argc, char *argv[])
 {
-    (void) argc;
-    (void) argv;
-    uint16_t i_out_raw, v_in_raw, v_out_raw;
-    hw_get_adc_values(&i_out_raw, &v_in_raw, &v_out_raw);
-    uint32_t v_in = pwrctl_calc_vin(v_in_raw);
-    uint32_t v_out = pwrctl_calc_vout(v_out_raw);
-    uint32_t i_out = pwrctl_calc_iout(i_out_raw);
+
 }

@@ -5,27 +5,46 @@
     ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)))
 
 int16_t previous_voltage_error = 0;
-int16_t voltage_integral = 0 ;
-int16_t target_voltage = 0 ;
+int16_t voltage_integral = 0;
+int16_t target_voltage = 0;
 int16_t current_voltage = 0;
+
+
+int16_t target_current = 0;
+uint16_t current_I = 0;
+
+
 uint16_t required_DAC_value = 0;
 
 uint64_t previous_ticks = 0;
 
 //this should all be moved to the global config file
-#define V_OFFSET_CONST 0.8
-#define V_P_CONST 0.6
-#define V_I_CONST 1
-#define V_D_CONST 0.2//0.2
+#define V_OFFSET_CONST 0.95
+#define V_P_CONST_DEFAULT 0.3
+#define V_I_CONST_DEFAULT 1
+#define V_D_CONST_DEFAULT 0.1//0.2
 
-#define WINDUP_CONSTRAINTS 5000
-#define ALLOWABLE_OVERSHOOT 100
+#define WINDUP_CONSTRAINTS_DEFAULT 5000
+#define ALLOWABLE_OVERSHOOT_DEFAULT 100
 //...once I find it.
+
+float V_OFFSET_CONST = V_OFFSET_CONST_DEFAULT;
+float V_P_CONST = V_P_CONST_DEFAULT;
+float V_I_CONST = V_I_CONST_DEFAULT;
+float V_D_CONST = V_D_CONST_DEFAULT;
+
+uint16_t WINDUP_CONSTRAINTS = WINDUP_CONSTRAINTS_DEFAULT;
+uint16_t ALLOWABLE_OVERSHOOT_DEFAULT = ALLOWABLE_OVERSHOOT_DEFAULT;
+
+
+// void update_pid_tuning(uint16_t new_V_OFFSET_CONST,uint16_t new_,uint16_t new_,uint16_t new_,uint16_t new_,uint16_t new_){
+//
+// }
 
 void pid_update_voltages(){
   uint16_t i_out_raw, v_in_raw, v_out_raw;
   hw_get_adc_values(&i_out_raw, &v_in_raw, &v_out_raw);
-  (void) i_out_raw;
+  current_I = pwrctl_calc_iout(i_out_raw);
   (void) v_in_raw;
   current_voltage = pwrctl_calc_vout(v_out_raw);
 }
@@ -35,6 +54,22 @@ void set_target_pid_voltage(int new_target_voltage){
   if(new_target_voltage != target_voltage){
     voltage_integral = 0;
     target_voltage = new_target_voltage;
+  }
+}
+
+void set_target_pid_current(int new_target_current){
+  dbg_printf("target_current: %u\r\n",new_target_current);
+  if(new_target_current != target_current){
+    voltage_integral = 0;
+    target_current = new_target_current;
+  }
+}
+
+int process_pid_algorithms(){
+  dbg_printf("target_current: %u\r\n",target_current);
+  dbg_printf("current_i: %u\r\n",current_I);
+  if(current_I < target_current){
+    process_voltage_pid();
   }
 }
 
