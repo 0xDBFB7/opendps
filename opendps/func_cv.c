@@ -82,11 +82,11 @@ ui_number_t cv_current = {
         .y = 60,
         .can_focus = true,
     },
-    .font_size = 1,
+    .font_size = 0.75,
     .value = 0,
     .min = 0,
     .max = CONFIG_DPS_MAX_CURRENT,
-    .num_digits = 1,
+    .num_digits = 2,
     .num_decimals = 3, /** 3 decimals => value is in milliapmere */
     .unit = unit_ampere,
     .changed = &current_changed,

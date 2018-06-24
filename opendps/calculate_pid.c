@@ -25,9 +25,13 @@ uint16_t required_DAC_value = 0;
 
 uint64_t previous_ticks = 0;
 
+int pid_just_reset = 1;
+
+
 void dummy_debug(const char *fmt, ...);
 
 #define pid_debug dbg_printf
+// #define pid_debug dummy_debug
 
 //this should all be moved to the global config file
 #define V_OFFSET_CONST_DEFAULT 0.95 // this offsets the whole pid on startup
@@ -38,8 +42,8 @@ void dummy_debug(const char *fmt, ...);
                                     // killing themselves laughing at how stupid this is.
                                     // But it seems to work okay.
                                     // burma shave
-#define V_P_CONST_DEFAULT 0.6
-#define V_I_CONST_DEFAULT 0.3
+#define V_P_CONST_DEFAULT 0.2
+#define V_I_CONST_DEFAULT 0.1
 #define V_D_CONST_DEFAULT 0.05//0.2
 
 #define C_P_CONST_DEFAULT 0.3
@@ -78,8 +82,10 @@ void pid_update_voltages(){
 }
 
 void reset_pid(){
+  pid_just_reset = 1;
   voltage_integral = 0;
   current_integral = 0;
+  pid_update_voltages();
   previous_ticks = get_ticks();
 }
 
@@ -107,12 +113,19 @@ int process_pid_algorithms(){ //units: millivolts.
 
   /////////////////VOLTAGE//////////////
   int16_t voltage_error = target_voltage-current_voltage;
-  voltage_integral = voltage_integral + voltage_error*timestep;
+
   int16_t voltage_derivative = (voltage_error - previous_voltage_error)/timestep;
   /////////////////Amps//////////////
   int16_t current_error = target_current-current_amps;
   current_integral = current_integral + current_error*timestep;
   int16_t current_derivative = (current_error - previous_current_error)/timestep;
+  if(pwrctl_vout_enabled()){
+    voltage_integral = voltage_integral + voltage_error*timestep;
+  }
+  else{
+    voltage_integral = 0;
+    previous_voltage_error = current_error;
+  }
   /////////////////CC/CV HYSTERESIS/////
   if(current_amps > target_current){
     current_mode = 1;
@@ -149,6 +162,8 @@ int process_pid_algorithms(){ //units: millivolts.
   pid_debug("required_DAC_value: %u\r\n",required_DAC_value);
   pid_debug("current_mode: %u\r\n",current_mode);
   pid_debug("PID: %u, %u, %u", (int)(V_P_CONST*100),(int)(V_I_CONST*100),(int)(V_D_CONST*100));
+
+  pid_just_reset = 0;
 
   return required_DAC_value;
 }

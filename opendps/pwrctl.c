@@ -104,7 +104,7 @@ bool pwrctl_set_ilimit(uint32_t value_ma)
     /** @todo Check with I_limit, currently filtered by ui.c */
     i_limit = value_ma;
     set_target_pid_current(value_ma);
-    pwrctl_i_limit_raw = pwrctl_calc_ilimit_adc(i_limit+1000);
+    pwrctl_i_limit_raw = pwrctl_calc_ilimit_adc(i_limit+5000);//FIXME! This OCP should be configurable.
     return true;
 }
 
