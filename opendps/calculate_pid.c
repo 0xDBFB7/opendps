@@ -43,14 +43,14 @@ void dummy_debug(const char *fmt, ...);
                                     // But it seems to work okay.
                                     // burma shave
 #define V_P_CONST_DEFAULT 0.2
-#define V_I_CONST_DEFAULT 0.1
-#define V_D_CONST_DEFAULT 0.05//0.2
+#define V_I_CONST_DEFAULT 0.15
+#define V_D_CONST_DEFAULT 0.1//0.2
 
 #define C_P_CONST_DEFAULT 0.3
 #define C_I_CONST_DEFAULT 1
 #define C_D_CONST_DEFAULT 0.1//0.2
 
-#define WINDUP_CONSTRAINTS_DEFAULT 5000
+#define WINDUP_CONSTRAINTS_DEFAULT 30000
 #define ALLOWABLE_OVERSHOOT_DEFAULT 100
 //...once I find it.
 
@@ -82,7 +82,6 @@ void pid_update_voltages(){
 }
 
 void reset_pid(){
-  pid_just_reset = 1;
   voltage_integral = 0;
   current_integral = 0;
   pid_update_voltages();
