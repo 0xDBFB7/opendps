@@ -234,7 +234,7 @@ def handle_response(command, frame, args):
 
     if args.json:
         print(json.dumps(_json, indent=4, sort_keys=True))
- 
+
     return ret_dict
 
 """
@@ -318,6 +318,17 @@ def handle_commands(args):
     if args.status:
         communicate(comms, create_status(), args)
 
+    if args.pid-P != None:
+        i_limit = int(args.pid-P)
+        communicate(comms, create_pid_p(int(args.pid-P)), args)
+
+    if args.pid-I != None:
+        i_limit = int(args.pid-P)
+        communicate(comms, create_pid_i(int(args.pid-I)), args)
+
+    if args.pid-D != None:
+        i_limit = int(args.pid-P)
+        communicate(comms, create_pid_p(int(args.pid-P)), args)
 """
 Return True if the parameter if_name is an IP address.
 """
@@ -498,6 +509,10 @@ def main():
     parser.add_argument('-l', '--unlock', action='store_true', help="Unlock device keys")
     parser.add_argument('-s', '--status', action='store_true', help="Read voltage/current settings and measurements")
     parser.add_argument('-j', '--json', action='store_true', help="Output status as JSON")
+    parser.add_argument('-x', '--pid-P', type=int, help="")
+    parser.add_argument('-y', '--pid-I', type=int, help="")
+    parser.add_argument('-z', '--pid-D', type=int, help="")
+
     parser.add_argument('-v', '--verbose', action='store_true', help="Verbose communications")
     parser.add_argument('-U', '--upgrade', type=str, dest="firmware", help="Perform upgrade of OpenDPS firmware")
     parser.add_argument('-f', '--force', action='store_true', help="Force upgrade even if dpsctl complains about the firmware")

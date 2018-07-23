@@ -167,10 +167,6 @@ int process_pid_algorithms(){ //units: millivolts.
   return required_DAC_value;
 }
 
-int process_current_pid(){
-
-}
-
 void pid_update_dac_value(){
   DAC_DHR12R1 = pwrctl_calc_vout_dac(required_DAC_value);
 }

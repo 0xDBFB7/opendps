@@ -35,6 +35,10 @@ cmd_lock = 7
 cmd_ocp_event = 8
 cmd_upgrade_start = 9
 cmd_upgrade_data = 10
+cmd_pid_p = 11
+cmd_pid_i = 12
+cmd_pid_d = 13
+
 cmd_response = 0x80
 
 # wifi_status_t
@@ -83,6 +87,27 @@ def create_vout(vout_mv):
     f = uFrame()
     f.pack8(cmd_set_vout)
     f.pack16(vout_mv)
+    f.end()
+    return f
+
+def create_pid_p(pid_p):
+    f = uFrame()
+    f.pack8(cmd_pid_p)
+    f.pack16(pid_p)
+    f.end()
+    return f
+
+def create_pid_i(pid_i):
+    f = uFrame()
+    f.pack8(cmd_pid_i)
+    f.pack16(pid_i)
+    f.end()
+    return f
+
+def create_pid_i(pid_d):
+    f = uFrame()
+    f.pack8(cmd_pid_d)
+    f.pack16(pid_d)
     f.end()
     return f
 
@@ -189,4 +214,3 @@ def unpack_lock(uframe):
 # Returns i_cut
 def unpack_ocp(uframe):
     return uframe.unpack16()
-
