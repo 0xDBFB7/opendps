@@ -13,3 +13,8 @@ build/
 firmware/
 html/
 .gdb_history
+.DS_Store
+xcuserdata/
+emu/dpsemu
+emu/dpsemu.exe
+esp8266-proxy/private_ssid_config.h

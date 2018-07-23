@@ -27,9 +27,8 @@
 #include "my_assert.h"
 #include "uui.h"
 #include "tft.h"
+#include "opendps.h"
 
-/** @todo: move */
-void ui_update_power_status(bool enabled);
 
 /**
  * @brief      Callback for got focus because of M1/M2 presses
@@ -62,6 +61,7 @@ void uui_init(uui_t *ui, past_t *past)
     assert(ui);
     ui->past = past;
     ui->num_screens = ui->cur_screen = 0;
+    ui->is_visible = true;
 }
 
 void uui_add_screen(uui_t *ui, ui_screen_t *screen)
@@ -95,6 +95,7 @@ void uui_refresh(uui_t *ui, bool force)
             item->needs_redraw = false;
         }
     }
+    tft_blit((uint16_t*) screen->icon_data, screen->icon_width, screen->icon_height, 48, 128-screen->icon_height);
 }
 
 void uui_activate(uui_t *ui)
@@ -132,6 +133,10 @@ void uui_handle_screen_event(uui_t *ui, event_t event)
     assert(screen);
     ui_item_t *item = screen->items[screen->cur_item];
     assert(item);
+
+    if (!ui->is_visible) {
+        return;
+    }
 
     switch(event) {
         case event_rot_left_set:
@@ -186,12 +191,15 @@ void uui_handle_screen_event(uui_t *ui, event_t event)
 
         case event_button_enable:
         case event_ocp:
-            screen->is_enabled = !screen->is_enabled;
-            if (screen->is_enabled && screen->past_save) {
-                screen->past_save(ui->past);
+            /** If current screen can be enabled */
+            if (screen->enable) {
+                screen->is_enabled = !screen->is_enabled;
+                if (screen->is_enabled && screen->past_save) {
+                    screen->past_save(ui->past);
+                }
+                screen->enable(screen->is_enabled);
+                opendps_update_power_status(screen->is_enabled); /** @todo: move */
             }
-            screen->enable(screen->is_enabled);
-            ui_update_power_status(screen->is_enabled); /** @todo: move */
             break;
 
         default:
@@ -199,22 +207,31 @@ void uui_handle_screen_event(uui_t *ui, event_t event)
     }
 }
 
-static void switch_screen(uui_t *ui, bool forward)
+void uui_next_screen(uui_t *ui)
 {
+    uint32_t new_screen = (ui->cur_screen + 1) % ui->num_screens;
+    uui_set_screen(ui, new_screen);
+}
+
+void uui_prev_screen(uui_t *ui)
+{
+    uint32_t new_screen = ui->cur_screen ? ui->cur_screen -1 : ui->num_screens - 1;
+    uui_set_screen(ui, new_screen);
+}
+
+void uui_set_screen(uui_t *ui, uint32_t screen_idx)
+{
+    assert(screen_idx < ui->num_screens);
     ui_screen_t *cur_screen = ui->screens[ui->cur_screen];
     assert(cur_screen);
     ui_item_t *item = cur_screen->items[cur_screen->cur_item];
     assert(item);
-    if (forward) {
-        ui->cur_screen = (ui->cur_screen + 1) % ui->num_screens;
-    } else {
-        ui->cur_screen = ui->cur_screen ? ui->cur_screen -1 : ui->num_screens - 1;
-    }
+    ui->cur_screen = screen_idx;
     ui_screen_t *new_screen = ui->screens[ui->cur_screen];
     assert(new_screen);
     if (new_screen != cur_screen) {
-        cur_screen->enable(false); /** Alway disable current function when switching */
-        ui_update_power_status(false); /** @todo: move */
+//        cur_screen->enable(false); /** Alway disable current function when switching */
+        opendps_update_power_status(false); /** @todo: move */
         if (cur_screen->is_enabled) {
             /** Disable the old screen as it will no longer be in control of power out */
             cur_screen->enable(false);
@@ -227,16 +244,6 @@ static void switch_screen(uui_t *ui, bool forward)
     }
 }
 
-void uui_next_screen(uui_t *ui)
-{
-    switch_screen(ui, true);
-}
-
-void uui_prev_screen(uui_t *ui)
-{
-    switch_screen(ui, false);
-}
-
 void ui_item_init(ui_item_t *item)
 {
     item->has_focus = false;
@@ -247,4 +254,18 @@ void ui_item_init(ui_item_t *item)
 void uui_tick(uui_t *ui)
 {
     ui->screens[ui->cur_screen]->tick();
+}
+
+void uui_show(uui_t *ui, bool show)
+{
+    ui->is_visible = show;
+}
+
+void uui_disable_cur_screen(uui_t *ui)
+{
+    ui_screen_t *screen = ui->screens[ui->cur_screen];
+    if (screen->enable && screen->is_enabled) {
+        screen->is_enabled = false;
+        screen->enable(screen->is_enabled);
+    }
 }

@@ -29,8 +29,8 @@ ARCH_FLAGS	= -mthumb -mcpu=cortex-m3 $(FP_FLAGS) -mfix-cortex-m3-ldrd
 # OpenOCD specific variables
 
 OOCD		?= openocd
-OOCD_INTERFACE	?= cmsis-dap
-OOCD_TARGET	?= stm32f1
+OOCD_INTERFACE	?= stlink-v2
+OOCD_TARGET	?= stm32f1x
 
 ################################################################################
 # Black Magic Probe specific variables

@@ -4,7 +4,7 @@ BINARY = opendps
 COMMANDLINE := 0
 
 # Set build model, defaults to DPS5005
-MODEL := DPS5015
+MODEL := DPS5005
 
 # Include splash screen
 SPLASH_SCREEN := 0
@@ -14,7 +14,7 @@ SPLASH_SCREEN := 0
 WIFI := 1
 
 # Maximum current your DPS model can provide. Eg 5000mA for the DPS5005
-MAX_CURRENT := 20000
+MAX_CURRENT := 5000
 # Please note that the UI currently does not handle settings larger that 9.99A
 
 # Color space for the DPS display. Most units use GBR but RGB has been spotted in the wild
@@ -27,7 +27,7 @@ TINT ?= ffffff
 CC_ENABLE ?= 1
 
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
-CFLAGS = -I. -DCONFIG_DPS_MAX_CURRENT=$(MAX_CURRENT) -DGIT_VERSION=\"$(GIT_VERSION)\"
+CFLAGS = -I. -DCONFIG_DPS_MAX_CURRENT=$(MAX_CURRENT) -DGIT_VERSION=\"$(GIT_VERSION)\" -Wno-missing-braces
 
 # Output voltage and current limit are persisted in flash,
 # this is the default setting
@@ -38,7 +38,6 @@ LDSCRIPT = stm32f100_app.ld
 
 OBJS = \
     flashlock.o \
-    calculate_pid.o \
     bootcom.o \
     crc16.o \
     uui.o \

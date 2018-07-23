@@ -29,17 +29,16 @@
 #include <stdlib.h>
 #include "dbg_printf.h"
 #include "cli.h"
-#include "uui.h"
 #include "hw.h"
 #include "pwrctl.h"
 #include "serialhandler.h"
+
+extern void ui_update_power_status(bool enabled); // opendps.c
 
 static void stat_cmd(uint32_t argc, char *argv[]);
 static void on_cmd(uint32_t argc, char *argv[]);
 static void off_cmd(uint32_t argc, char *argv[]);
 static void v_cmd(uint32_t argc, char *argv[]);
-
-static void pid_tune_cmd(uint32_t argc, char *argv[]);
 
 
 static const cli_command_t commands[] = {
@@ -71,17 +70,10 @@ static const cli_command_t commands[] = {
         .help = "Set output <voltage> mV",
         .usage = "<millivolt>",
     },
-    {
-        .cmd = "tune",
-        .handler = &pid_tune_cmd,
-        .min_arg = 3, .max_arg = 3,
-        .help = "Set PID tuning parameters.",
-        .usage = "",
-    },
   };
 
 
-void cmdline_handle_rx_char(char c)
+void serial_handle_rx_char(char c)
 {
     static char buffer[80];
     static uint32_t i = 0;
@@ -150,8 +142,4 @@ static void v_cmd(uint32_t argc, char *argv[])
     uint32_t v_out = atoi(argv[1]);
     dbg_printf("Setting V_out to %umv\n", v_out);
     pwrctl_set_vout(v_out);
-}
-
-static void pid_tune_cmd(uint32_t argc, char *argv[]){
-    update_pid_tuning(atoi(argv[1]),atoi(argv[2]),atoi(argv[3]));
 }
